@@ -2,7 +2,8 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-
+import os
+from datetime import datetime
 from scrapy.exporters import CsvItemExporter
 from vehicle_scraping import items
 
@@ -13,11 +14,22 @@ def item_type(item):
 
 class MultiCSVItemPipeline(object):
     defined_items = [name for name, _ in items.__dict__.items() if "Item" in name]
+    time_str = datetime.now().strftime("_%Y-%m-%d_%H_%M_%S")
 
     def open_spider(self, spider):
         self.files = dict(
             [
-                (name, open("vehicle_scraping/data/" + name + ".csv", "w+b"))
+                (
+                    name,
+                    open(
+                        os.path.join(
+                            "vehicle_scraping",
+                            "data",
+                            spider.name + "_" + name + self.time_str + ".csv",
+                        ),
+                        "w+b",
+                    ),
+                )
                 for name in self.defined_items
             ]
         )
