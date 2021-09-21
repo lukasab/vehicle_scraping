@@ -17,33 +17,29 @@ class MultiCSVItemPipeline(object):
     time_str = datetime.now().strftime("_%Y-%m-%d_%H_%M_%S")
 
     def open_spider(self, spider):
-        self.files = dict(
-            [
-                (
-                    name,
-                    open(
-                        os.path.join(
-                            "vehicle_scraping",
-                            "data",
-                            spider.name + "_" + name + self.time_str + ".csv",
-                        ),
-                        "w+b",
-                    ),
-                )
-                for name in self.defined_items
-            ]
-        )
-        self.exporters = dict(
-            [(name, CsvItemExporter(self.files[name])) for name in self.defined_items]
-        )
-        [e.start_exporting() for e in self.exporters.values()]
+        self.files = dict()
+        self.exporters = dict()
 
     def close_spider(self, spider):
         [e.finish_exporting() for e in self.exporters.values()]
         [f.close() for f in self.files.values()]
 
+    def create_exporter(self, item_name, spider):
+        if item_name not in self.exporters:
+            self.files[item_name] = open(
+                os.path.join(
+                    "vehicle_scraping",
+                    "data",
+                    spider.name + "_" + item_name + self.time_str + ".csv",
+                ),
+                "w+b",
+            )
+            self.exporters[item_name] = CsvItemExporter(self.files[item_name])
+            self.exporters[item_name].start_exporting()
+
     def process_item(self, item, spider):
         item_name = item_type(item)
         if item_name in set(self.defined_items):
+            self.create_exporter(item_name, spider)
             self.exporters[item_name].export_item(item)
         return item
