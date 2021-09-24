@@ -37,4 +37,4 @@ We have added a download delay of 0.5 seconds for every request although, this m
 This is the amount of time it took to scrape each site:
 
 - Autoevolution: 9248.006482s ~= 2.5 hours
-- Motrcycle: TBD s ~= TBD hours
+- Motrcycle: TBD 18284s 5.1 = TBD hours
